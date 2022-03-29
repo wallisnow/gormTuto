@@ -6,8 +6,11 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+var Conn *Connection
+
 type Connection struct {
-	db *gorm.DB
+	Db  *gorm.DB
+	err error
 }
 
 func Show() error {
@@ -26,23 +29,34 @@ func Show() error {
 	return nil
 }
 
-func NewConnection() *Connection {
-	db, _ := gorm.Open("mysql", "citizix_user:An0thrS3crt@/citizix_db?charset=utf8&parseTime=True&loc=Local")
+func GetConnection() *Connection {
+	if Conn == nil {
+		Conn = newConnection()
+	}
+	return Conn
+}
+
+func newConnection() *Connection {
+	db, err := gorm.Open("mysql", "citizix_user:An0thrS3crt@/citizix_db?charset=utf8&parseTime=True&loc=Local")
+	db.LogMode(true)
 	return &Connection{
-		db: db,
+		Db:  db,
+		err: err,
 	}
 }
 
-func (this *Connection) Query() {
-	this.db.LogMode(true)
-	tc := &TopicClass{}
-	this.db.First(tc)
-	fmt.Println(tc)
+func (this *Connection) PrintFirst(model interface{}) {
+	this.Db.First(model)
+	fmt.Println(model)
+}
+
+func (this *Connection) Create(model interface{}) int64 {
+	return this.Db.Create(model).RowsAffected
 }
 
 func (this *Connection) CloseDb() {
-	if this.db != nil {
-		err := this.db.Close()
+	if this.Db != nil {
+		err := this.Db.Close()
 		if err != nil {
 			return
 		}

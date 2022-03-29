@@ -86,9 +86,27 @@ func main() {
 
 	//===================================================Lesson 6=======================================
 	//使用orm, 非原生sql
-	con := NewConnection()
-	con.Query()
+	con := GetConnection()
+	con.PrintFirst(&TopicClass{})
+	//插入一条数据
+	con.Create(&TopicClass{
+		Id:        2,
+		ClassName: "test",
+		ClassType: "test",
+	})
+
+	//查询刚才插入的数据
+	var tcs []TopicClass
+	con.Db.Where(&TopicClass{Id: 2}).Find(&tcs)
+	fmt.Println(tcs)
+	fmt.Println("do delete ... ")
+	con.Db.Delete(&TopicClass{Id: 2})
+	con.Db.Where(&TopicClass{Id: 2}).Find(&tcs)
+	fmt.Println(tcs)
+
 	con.CloseDb()
+
+	//===================================================Lesson 7=======================================
 
 	router.Run()
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
+	"time"
 )
 
 var Conn *Connection
@@ -39,6 +40,9 @@ func GetConnection() *Connection {
 func newConnection() *Connection {
 	db, err := gorm.Open("mysql", "citizix_user:An0thrS3crt@/citizix_db?charset=utf8&parseTime=True&loc=Local")
 	db.LogMode(true)
+	db.DB().SetMaxIdleConns(10)
+	db.DB().SetMaxOpenConns(100)
+	db.DB().SetConnMaxLifetime(time.Hour)
 	return &Connection{
 		Db:  db,
 		err: err,
